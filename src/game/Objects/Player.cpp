@@ -13075,62 +13075,55 @@ bool Player::TakeOrReplaceQuestStartItems(uint32 quest_id, bool msg, bool giveQu
 {
     Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest_id);
 
-    if (qInfo)
+    if (!qInfo)
+        return true;
+
+    uint32 srcItemID = qInfo->GetSrcItemId();
+
+    if (0 == srcItemID)
+        return true;
+
+    // If nullptr, someone messed up in DB
+    ItemPrototype const* pItem = sObjectMgr.GetItemPrototype(srcItemID);
+
+    if (nullptr == pItem)
+        return true;
+
+    uint32 count = qInfo->GetSrcItemCount();
+
+    if (giveQuestStartItem && quest_id == pItem->StartQuest)
     {
-        uint32 srcItemId = qInfo->GetSrcItemId();
+        // Quest-starting item and item given at quest start identical. Just leave it.
+        return true;
+    }
+    else
+    {
+        // Can't destroy items in certain cases.
+        InventoryResult res = CanUnequipItems(srcItemID, count);
 
-        if (srcItemId > 0)
+        if (res != EQUIP_ERR_OK)
         {
-            uint32 count = qInfo->GetSrcItemCount();
+            if (msg)
+                SendEquipError(res, NULL, NULL, srcItemID);
 
-            if (count <= 0)
-                count = 1;
+            return false;
+        }
 
+        // Additional check to prevent possible unlimited gold
+        if (!HasItemCount(srcItemID, count, true))
+            return true;
 
-            if (ItemPrototype const* pItem = sObjectMgr.GetItemPrototype(srcItemId))
-            {
+        // Start- and given item not the same, destroy it.
+        DestroyItemCount(srcItemID, count, true, true);
 
-                if (giveQuestStartItem && quest_id == pItem->StartQuest)
-                {
-                    // Start item and item given at quest start identical. Just leave it.
-                    return true;
-                }
-                else
-                {
-                    // Can't destroy items in certain cases.
-                    InventoryResult res = CanUnequipItems(srcItemId, count);
-
-                    if (res != EQUIP_ERR_OK)
-                    {
-                        if (msg)
-                            SendEquipError(res, NULL, NULL, srcItemId);
-
-                        return false;
-                    }
-
-                    // Additional check to prevent possible unlimited gold
-                    if (HasItemCount(srcItemId, count, true))
-                    {
-                        // Start- and given item not the same, destroy it.
-                        DestroyItemCount(srcItemId, count, true, true);
-                        
-                        // Replace item, if requested
-                        if (giveQuestStartItem)
-                        {
-                            // Check if quest start item is available
-                            auto qItemIterator = sQuestStartItems.find(quest_id);
-
-                            // If start item found, add to inventory
-                            if (qItemIterator != sQuestStartItems.end())
-                                AddItem(qItemIterator->second, count);
-
-                        }
-                    }
-
-                }
-            }
+        // Replace item, if requested
+        if (giveQuestStartItem)
+        {
+            if (uint32 questStartingItemID = sObjectMgr.GetQuestStartingItemID(quest_id))
+                AddItem(questStartingItemID, count);
 
         }
+
     }
 
     return true;
