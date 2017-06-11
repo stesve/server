@@ -1,0 +1,8 @@
+INSERT INTO `migrations` VALUES ('20170611155039');
+
+-- Enable Gravemoss spawns
+-- Affected GUIDs: 4432, 4433, 4435, 4437, 4438, 4439, 4440, 4443, 4446, 4447, 4448, 4449, 4451, 4452, 4454, 4455, 4458, 4459, 4461, 4463, 4464, 4465, 4466, 4467, 4469, 4472, 4473, 4474, 4476, 4477, 4479, 4480, 4481, 4484, 4485, 4487, 4488, 4489, 4491, 4494, 4495, 4499, 4500, 4502, 4503, 4504, 4505, 4507, 18680, 18677, 18676, 17892, 16751, 14026, 33336, 33483, 39995
+UPDATE `gameobject` SET `spawnFlags` = `spawnFlags` & ~2 WHERE `id` = 1628;
+
+-- Only one Gravemoss with animprogress 0
+UPDATE `gameobject` SET `animprogress` = 100 WHERE `guid` = 39995 AND `id` = 1628;
