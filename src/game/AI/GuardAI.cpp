@@ -50,7 +50,14 @@ void GuardAI::MoveInLineOfSight(Unit *u)
             (u->IsHostileToPlayers() || m_creature->IsHostileTo(u)) &&
             u->isInAccessablePlaceFor(m_creature))
     {
+
         //Need add code to let guard support player
+        if (Unit* controllingUnit = u->GetCharmer())
+        {
+            if (u->IsPlayer())
+                u = controllingUnit;
+        }
+
         AttackStart(u);
     }
 }

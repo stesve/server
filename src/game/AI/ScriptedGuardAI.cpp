@@ -38,13 +38,15 @@ EndScriptData */
 
 guardAI::guardAI(Creature* pCreature) : ScriptedAI(pCreature),
     GlobalCooldown(0),
-    BuffTimer(0)
+    BuffTimer(0),
+    PullCooldown(0)
 {}
 
 void guardAI::Reset()
 {
     GlobalCooldown = 0;
     BuffTimer = 0;                                          //Rebuff as soon as we can
+    PullCooldown = 4000;
 }
 
 void guardAI::Aggro(Unit *who)
@@ -105,6 +107,25 @@ void guardAI::UpdateAI(const uint32 diff)
     //Return since we have no target
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
         return;
+
+    if (m_creature->getVictim()->IsPlayer())
+        if (Unit* controllingUnit = m_creature->getVictim()->GetCharmer())
+            m_creature->Attack(controllingUnit, true);
+
+    if (PullCooldown < diff)
+    {
+        if (Unit* victim = m_creature->getVictim())
+        {
+            if (!m_creature->CanReachWithMeleeAttack(victim))
+            {
+                if (DoCastSpellIfCan(victim, 28337) == CAST_OK)
+                    PullCooldown = urand(4000, 10000);
+            }
+        }
+    }
+    else
+        PullCooldown -= diff;
+
 
     // Unreachable target ?
     if (!GlobalCooldown)
