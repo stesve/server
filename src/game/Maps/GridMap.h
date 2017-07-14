@@ -112,7 +112,6 @@ struct GridMapLiquidData
 {
     uint32 type_flags;
     uint32 entry;
-    uint32 spell;
     float level;
     float depth_level;
 };
