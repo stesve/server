@@ -441,7 +441,7 @@ void Player::UpdateDamagePhysical(WeaponAttackType attType)
     float mindamage;
     float maxdamage;
 
-    CalculateMinMaxDamage(attType, false, mindamage, maxdamage);
+    CalculateMinMaxDamage(attType, true, mindamage, maxdamage);
 
     switch (attType)
     {
