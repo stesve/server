@@ -1582,7 +1582,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
         else
             immune = false;
 
-        subDamage->damage = CalculateDamage(damageInfo->attackType, false, i);
+        subDamage->damage = CalculateDamage(damageInfo->attackType, true, i);
         // Add melee damage bonus
         subDamage->damage = MeleeDamageBonusDone(damageInfo->target, subDamage->damage, damageInfo->attackType, nullptr, DIRECT_DAMAGE, 1, nullptr, i == 0);
         subDamage->damage = damageInfo->target->MeleeDamageBonusTaken(this, subDamage->damage, damageInfo->attackType, nullptr, DIRECT_DAMAGE, 1, nullptr, i == 0);
